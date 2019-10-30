@@ -5,8 +5,8 @@ with open("README.md", "r", encoding="utf-8") as f:
 
 setup(
     name="recommend",
-    version="0",
-    description="squat",
+    version="0.1",
+    description="Implicit Recommender",
     long_description=long_description,
     long_description_content_type="text/markdown",
     classifiers=[
@@ -20,5 +20,6 @@ setup(
     license="MIT",
     py_modules=["recommend"],
     python_requires=">=3.6",
+    install_requires=['scipy', 'numpy'],
     setup_requires=["setuptools>=38.6.0"],
 )
