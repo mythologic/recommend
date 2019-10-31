@@ -1,12 +1,12 @@
 import numpy as np
 from scipy.spatial.distance import cdist
 
-class NearestNeighbors:
-    def __init__(self, n_neighbors=5):
-        self.n_neighbors = n_neighbors
+class AdjacentNeighbors:
+    def __init__(self, n=5):
+        self.n = n
 
     def __repr__(self):
-        return f'NearestNeighbors(n_neighbors={self.n_neighbors})'
+        return f'AdjacentNeighbors(n={self.n})'
 
     def fit(self, X):
         self.X = X
@@ -14,38 +14,38 @@ class NearestNeighbors:
 
     def kneighbors(self, X, return_distance=False):
         distances = cdist(X, self.X)
-        neighbors = np.argsort(distances)[:, :self.n_neighbors]
+        neighbors = np.argsort(distances)[:, :self.n]
         if return_distance:
             return distances, neighbors
         return neighbors
 
-class ItemVectorizer:
-    def __init__(self, delimiter=',', max_features=None):
+class ThingVectorizer:
+    def __init__(self, delimiter=',', max_things=None):
         self.delimiter = delimiter
-        if max_features:
-            self.max_features = max_features
+        if max_things:
+            self.max_things = max_things
         else:
-            self.max_features = np.inf
+            self.max_things = np.inf
 
     def __repr__(self):
-        return f'ItemVectorizer(delimiter="{self.delimiter}", max_features={self.max_features})'
+        return f'ThingVectorizer(delimiter="{self.delimiter}", max_things={self.max_things})'
 
     def fit(self, X):
-        self.items = []
+        self.things = []
         for row in X:
-            if len(self.items) > self.max_features:
+            if len(self.things) > self.max_things:
                 break
-            for item in row.split(self.delimiter):
-                if item not in self.items:
-                    self.items.append(item)
+            for thing in row.split(self.delimiter):
+                if thing not in self.things:
+                    self.things.append(thing)
         return self
 
     def transform(self, X):
-        Xt = np.zeros((len(X), len(self.items)), dtype=int)
+        Xt = np.zeros((len(X), len(self.things)), dtype=int)
         for i, row in enumerate(X):
-            for item in row.split(self.delimiter):
+            for thing in row.split(self.delimiter):
                 try:
-                    idx = self.items.index(item)
+                    idx = self.things.index(thing)
                     Xt[i, idx] = 1
                 except ValueError:
                     pass
@@ -56,25 +56,25 @@ class ItemVectorizer:
         Xt = self.transform(X)
         return Xt
 
-class NNRecommender:
-    def __init__(self, n_neighbors=5, delimiter=',', max_features=None):
-        self.iv = ItemVectorizer(delimiter, max_features)
-        self.nn = NearestNeighbors(n_neighbors)
+class Recommend:
+    def __init__(self, n=5, delimiter=',', max_things=None):
+        self.tv = ThingVectorizer(delimiter, max_things)
+        self.an = AdjacentNeighbors(n)
 
     def __repr__(self):
-        return f'NNRecommender(n_neighbors={self.nn.n_neighbors}, delimiter="{self.iv.delimiter}", max_features={self.iv.max_features})'
+        return f'Recommend(n={self.an.n}, delimiter="{self.tv.delimiter}", max_things={self.tv.max_things})'
 
     def fit(self, X):
         self.X = X
-        X = self.iv.fit_transform(X)
-        self.nn.fit(X)
+        X = self.tv.fit_transform(X)
+        self.an.fit(X)
         return self
 
     def predict(self, X):
         Xp = []
         for Xi in X:
-            Xt = self.iv.transform([Xi])
-            neighbors = self.nn.kneighbors(Xt)
+            Xt = self.tv.transform([Xi])
+            neighbors = self.an.kneighbors(Xt)
             repos = []
             for n in neighbors[0]:
                 r = self.X.iloc[int(n)].split(",")
