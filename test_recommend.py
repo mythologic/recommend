@@ -5,6 +5,35 @@ import pytest
 from recommend import AdjacentNeighbors, ThingVectorizer
 from recommend import Recommend
 
+from scipy.spatial.distance import cdist
+
+X = np.array([
+    [0, 0, 1, 0, 1, 0, 1],
+    [1, 1, 0, 1, 0, 0, 1],
+    [0, 0, 0, 0, 1, 0, 1],
+    [0, 1, 1, 0, 1, 0, 0],
+    [0, 1, 0, 1, 1, 1, 0],
+    [0, 1, 0, 0, 0, 1, 0],
+    [1, 0, 0, 1, 1, 0, 1],
+])
+
+%%timeit
+cdist(X, X)
+
+xy1 = X
+xy2 = X
+
+def ndist(xy1, xy2):
+    P = np.add.outer(np.sum(xy1**2, axis=1), np.sum(xy2**2, axis=1))
+    N = np.dot(xy1, xy2.T)
+    return np.sqrt(P - 2*N)
+
+%%timeit
+ndist(X, X)
+
+
+
+
 @pytest.fixture
 def X():
     X = np.array([

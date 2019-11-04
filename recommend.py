@@ -1,24 +1,6 @@
 import numpy as np
 from scipy.spatial.distance import cdist
 
-class AdjacentNeighbors:
-    def __init__(self, n=5):
-        self.n = n
-
-    def __repr__(self):
-        return f'AdjacentNeighbors(n={self.n})'
-
-    def fit(self, X):
-        self.X = X
-        return self
-
-    def kneighbors(self, X, return_distance=False):
-        distances = cdist(X, self.X)
-        neighbors = np.argsort(distances)[:, :self.n]
-        if return_distance:
-            return distances, neighbors
-        return neighbors
-
 class ThingVectorizer:
     def __init__(self, delimiter=',', max_things=None):
         self.delimiter = delimiter
@@ -33,10 +15,8 @@ class ThingVectorizer:
     def fit(self, X):
         self.things = []
         for row in X:
-            if len(self.things) > self.max_things:
-                break
             for thing in row.split(self.delimiter):
-                if thing not in self.things:
+                if (thing not in self.things) and (len(self.things) < self.max_things):
                     self.things.append(thing)
         return self
 
@@ -55,6 +35,25 @@ class ThingVectorizer:
         self.fit(X)
         Xt = self.transform(X)
         return Xt
+
+class AdjacentNeighbors:
+    def __init__(self, n=5):
+        self.n = n
+
+    def __repr__(self):
+        return f'AdjacentNeighbors(n={self.n})'
+
+    def fit(self, X):
+        self.X = X
+        return self
+
+    def kneighbors(self, X, return_distance=False):
+        distances = cdist(X, self.X)
+        neighbors = np.argsort(distances)[:, :self.n]
+        if return_distance:
+            return distances, neighbors
+        return neighbors
+
 
 class Recommend:
     def __init__(self, n=5, delimiter=',', max_things=None):
@@ -75,16 +74,31 @@ class Recommend:
         for Xi in X:
             Xt = self.tv.transform([Xi])
             neighbors = self.an.kneighbors(Xt)
-            repos = []
+            things = []
             for n in neighbors[0]:
-                r = self.X.iloc[int(n)].split(",")
-                repos.extend(r)
-            repos = list(set(repos))
-            repos = [r for r in repos if r not in Xi.split(",")]
-            Xp.append(repos)
+                t = self.X.iloc[int(n)].split(",")
+                things.extend(t)
+            things = list(set(things))
+            things = [t for t in things if t not in Xi.split(",")]
+            Xp.append(things)
         return Xp
 
+if __name__ == '__main__':
+    df = pd.DataFrame([
+        ['Ryan', 'thai,mexican,indian,hawaiian'],
+        ['Kavitha', 'thai,mexican,indian'],
+        ['Hock', 'thai,sushi,ethiopian'],
+        ['Benoit', 'thai,french,italian,ethiopian']
+    ], columns=['name', 'food'])
+
+    r = Recommend(n=2, delimiter=',')
+    r.fit(df['food'])
+    r.predict(df['food'])
+    r.predict(['indian,sushi,italian,korean'])
+
+
 # # TODO:
+# remove scipy dependency -> numpy
 # predict returns things that the person actually likes
 # predict returns numpy array
 # try to pickle
