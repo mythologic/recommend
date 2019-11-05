@@ -1,0 +1,15 @@
+language: python
+python:
+- '3.6'
+deploy:
+  provider: pypi
+  user: maxhumber
+  password: $PYPI_PASSWORD
+
+install:
+  - "pip install -e ."
+  - "pip install pytest"
+  - "pip install pandas"
+
+script:
+  - pytest
