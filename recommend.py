@@ -48,6 +48,7 @@ class AdjacentNeighbors:
         return self
 
     def kneighbors(self, X, return_distance=False):
+        # FIXME: there's a bug that will always return all distances
         distances = cdist(X, self.X)
         neighbors = np.argsort(distances)[:, :self.n]
         if return_distance:

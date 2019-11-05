@@ -1,38 +1,10 @@
 import numpy as np
 import pandas as pd
+from scipy.spatial.distance import cdist
 import pytest
 
 from recommend import AdjacentNeighbors, ThingVectorizer
 from recommend import Recommend
-
-from scipy.spatial.distance import cdist
-
-X = np.array([
-    [0, 0, 1, 0, 1, 0, 1],
-    [1, 1, 0, 1, 0, 0, 1],
-    [0, 0, 0, 0, 1, 0, 1],
-    [0, 1, 1, 0, 1, 0, 0],
-    [0, 1, 0, 1, 1, 1, 0],
-    [0, 1, 0, 0, 0, 1, 0],
-    [1, 0, 0, 1, 1, 0, 1],
-])
-
-%%timeit
-cdist(X, X)
-
-xy1 = X
-xy2 = X
-
-def ndist(xy1, xy2):
-    P = np.add.outer(np.sum(xy1**2, axis=1), np.sum(xy2**2, axis=1))
-    N = np.dot(xy1, xy2.T)
-    return np.sqrt(P - 2*N)
-
-%%timeit
-ndist(X, X)
-
-
-
 
 @pytest.fixture
 def X():
@@ -47,12 +19,21 @@ def X():
     ])
     return X
 
+def test_an_works_like_cdist(X):
+    an = AdjacentNeighbors(n=3)
+    an.fit(X)
+    dist, _ = an.kneighbors(X, return_distance=True)
+    result = (dist == cdist(X, X))
+    assert result.all()
+
 def test_nearest_neighbors(X):
     an = AdjacentNeighbors(n=3)
     an.fit(X)
-    an.kneighbors(X)
     r = an.kneighbors(X[0].reshape(1, -1))
     assert (r == np.array([[0, 2, 3]])).all()
+
+# Ryan -> write a test that will make sure it's returning the right number of neighbours
+# write here
 
 @pytest.fixture
 def df():
@@ -66,11 +47,17 @@ def df():
     ], columns=['user', 'items'])
     return df
 
-def test_item_vectorizer(df):
+def test_thing_vectorizer(df):
     tv = ThingVectorizer()
     tv.fit(df['items'])
     r = tv.transform(['c,h'])
     assert (r == np.array([[0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0]])).all()
+
+# Kavitha -> write a test for different delimiters like ' '
+# write here
+
+# Hock -> write a test for max_features, make sure it picks up the right number
+# write here
 
 @pytest.fixture
 def food():
@@ -85,5 +72,12 @@ def food():
 def test_nn_recommender(food):
     r = Recommend(n=2)
     r.fit(food['food'])
-    results = r.predict(['ethiopian,italian'])
+    anika = ['ethiopian,italian']
+    results = r.predict(anika)
     assert set(results[0]) == {'french', 'sushi', 'thai'}
+
+# Benoit -> write a test that will fail or return no neighbours
+# write here
+
+# Anika -> write a test that can accept two new users and see their results
+# write here
