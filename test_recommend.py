@@ -57,7 +57,17 @@ def test_thing_vectorizer(df):
 # write here
 
 # Hock -> write a test for max_features, make sure it picks up the right number
-# write here
+def test_max_things(df):
+    max_things = 2
+    tv = ThingVectorizer(delimiter=',',max_things=max_things)
+    tv.fit(df['items'])
+    assert tv.max_things == max_things
+
+def test_max_things_larger(df):
+    max_things = 16
+    tv = ThingVectorizer(delimiter=',',max_things=max_things)
+    tv.fit(df['items'])
+    assert tv.max_things == max_things
 
 @pytest.fixture
 def food():
