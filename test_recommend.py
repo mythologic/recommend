@@ -81,3 +81,26 @@ def test_nn_recommender(food):
 
 # Anika -> write a test that can accept two new users and see their results
 # write here
+@pytest.fixture
+def food():
+    food = pd.DataFrame([
+        ['Ryan', 'thai,mexican,indian,hawaiian'],
+        ['Kavitha', 'thai,mexican,indian'],
+        ['Hock', 'thai,sushi,ethiopian'],
+        ['Benoit', 'thai,french,italian,ethiopian']
+    ], columns=['name', 'food'])
+    return food
+def test_new_user(food):
+    r = Recommend(n = 1)
+    r.fit(food['food'])
+    predictions = {}
+    new_users = pd.DataFrame([
+        ['Rowena', ['thai,viet,french']],
+        ['Melissa', ['thai,korean,sushi']]
+    ], columns = ['name', 'food'])
+    i = 0
+    for user in new_users['food']:
+        prediction = r.predict(user)
+        predictions.update({new_users['name'][i]: set(prediction[0])})
+        i+= 1
+    assert predictions == {'Rowena' : set(['italian','ethiopian']), 'Melissa' : set(['ethiopian'])}
