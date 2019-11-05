@@ -79,5 +79,13 @@ def test_nn_recommender(food):
 # Benoit -> write a test that will fail or return no neighbours
 # write here
 
+def test_return_no_neighbors(food):
+    r = Recommend(n=2)
+    r.fit(food['food'])
+    maxhumber = ['african,caribbean']
+    results = r.predict(maxhumber)
+    assert set(results[0]) == {}
+
+
 # Anika -> write a test that can accept two new users and see their results
 # write here
