@@ -110,3 +110,10 @@ def test_nn_recommender(food):
     anika = ['ethiopian,italian']
     results = r.predict(anika)
     assert set(results[0]) == {'french', 'sushi', 'thai'}
+
+def test_return_no_neighbors(food):
+    r = Recommend(n=2)
+    r.fit(food['food'])
+    maxhumber = ['african,caribbean']
+    results = r.predict(maxhumber)
+    assert set(results[0]) == {}
