@@ -1,13 +1,8 @@
-remove scipy dependency -> numpy
-predict returns things that the person actually likes
 predict returns numpy array
 try to pickle
 AUC and precision@k
 train test split
-documentation
 doc strings
-logo
 github releases
 travis ci
 better examples to include
-better tests

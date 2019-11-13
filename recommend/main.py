@@ -1,24 +1,31 @@
-from .utils import ThingVectorizer, AdjacentNeighbors
+from .utils import ItemVectorizer, NearestNeighbors
+# from recommend.utils import ItemVectorizer, NearestNeighbors
+
+from unittest.mock import Mock
+self = Mock()
+n=5; delimiter=','; max_items=None
+
+
 
 class Recommend:
-    def __init__(self, n=5, delimiter=',', max_things=None):
-        self.tv = ThingVectorizer(delimiter, max_things)
-        self.an = AdjacentNeighbors(n)
+    def __init__(self, n=5, delimiter=',', max_items=None):
+        self.iv = ItemVectorizer(delimiter, max_items)
+        self.nn = NearestNeighbors(n)
 
     def __repr__(self):
-        return f'Recommend(n={self.an.n}, delimiter="{self.tv.delimiter}", max_things={self.tv.max_things})'
+        return f'Recommend(n={self.nn.n}, delimiter="{self.iv.delimiter}", max_items={self.iv.max_items})'
 
     def fit(self, X):
         self.X = X
-        X = self.tv.fit_transform(X)
-        self.an.fit(X)
+        X = self.iv.fit_transform(X)
+        self.nn.fit(X)
         return self
 
     def predict(self, X):
         Xp = []
         for Xi in X:
-            Xt = self.tv.transform([Xi])
-            neighbors = self.an.kneighbors(Xt)
+            Xt = self.iv.transform([Xi])
+            neighbors = self.nn.kneighbors(Xt)
             things = []
             for n in neighbors[0]:
                 t = self.X.iloc[int(n)].split(",")
