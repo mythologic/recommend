@@ -1,11 +1,11 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 with open("README.md", "r", encoding="utf-8") as f:
     long_description = f.read()
 
 setup(
     name="recommend",
-    version="0.2.2",
+    version="0.3",
     description="Implicit Recommender",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -18,8 +18,10 @@ setup(
     author="Max Humber",
     author_email="max.humber@gmail.com",
     license="MIT",
-    packages=["recommend"],
+    packages=find_packages(),
+    # pair with import pkg_resources
+    package_data={"recommend": ["data/candy.csv"]},
     python_requires=">=3.6",
-    install_requires=['scipy', 'numpy'],
+    install_requires=["scipy", "numpy"],
     setup_requires=["setuptools>=38.6.0"],
 )

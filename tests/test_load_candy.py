@@ -1,7 +1,9 @@
 import numpy as np
 import pytest
 
-from recommend import ItemVectorizer
+from recommend import load_candy
+
+candy = load_candy()
 
 
 @pytest.fixture
