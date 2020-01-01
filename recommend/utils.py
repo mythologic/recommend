@@ -4,8 +4,8 @@ from scipy.spatial.distance import cdist
 
 
 def load_candy():
-    """Load the candy data set as a numpy array.
-    > Note: candy can and should be wrapped by `pd.DataFrame(candy)`
+    """Load candy.csv as a numpy array.
+    > Note: candy can and *should* be wrapped by `pd.DataFrame(candy)`
     Example:
     ```
     import pandas as pd
@@ -14,7 +14,6 @@ def load_candy():
     ```
     """
     CANDY_PATH = pkg_resources.resource_filename("recommend", "data/candy.csv")
-    # f = "data/candy.csv"
     candy = np.genfromtxt(
         CANDY_PATH,
         delimiter=",",
