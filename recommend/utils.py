@@ -23,28 +23,83 @@ def load_candy():
     return candy
 
 
-class ItemVectorizer:
-    """Convert a collection of items into a matrix
-    Example:
-    ```
-    X = ['a,b,c','b,c','c,d','a']
-    iv = ItemVectorizer()
-    iv.fit_transform(X)
-    # array([
-    #     [1, 1, 1, 0],
-    #     [0, 1, 1, 0],
-    #     [0, 0, 1, 1],
-    #     [1, 0, 0, 0]
-    # ])
-    ```
-    """
+from sklearn.feature_extraction.text import CountVectorizer
+import pandas as pd
 
+df = pd.DataFrame([
+    ['this is a sentence'],
+    ['this is also a sentence'],
+    ['this is not a sentence']
+], columns=['sentences'])
+
+X = df['sentences'].values
+
+cvec = CountVectorizer(stop_words=None)
+cvec.fit(df['sentences'])
+pd.DataFrame(
+    cvec.transform(df['sentences']).todense(),
+    columns=cvec.get_feature_names()
+)
+dir(cvec)
+
+# 1. split
+# 2. map words to integers
+# >>> Maybe. figure out size of vocab
+# 3. figure out how to fill out zeroes and ones
+
+X = df['sentences'].values
+
+delimiter = ' '
+max_items = 100
+
+# this is the fitting step
+
+items_ = []
+for row in X:
+    for item in row.split(delimiter):
+        if (item not in items_) and (len(items_) < max_items):
+            items_.append(item)
+
+items_
+
+# Xt = np.zeros((len(X), len(items)), dtype=int)
+# for i, row in enumerate(X):
+#     for thing in row.split(delimiter):
+#         try:
+#             idx = items.index(thing)
+#             Xt[i, idx] = 1
+#         except ValueError:
+#             pass
+
+from scipy.sparse import csr_matrix
+
+total_users = len(X)
+total_items = len(items_)
+
+users = []
+items = []
+for user, item_list in enumerate(X):
+    for item in item_list.split(delimiter):
+        try:
+            users.append(user)
+            items.append(items_.index(item))
+        except ValueError:
+            pass
+
+data = [1] * len(users)
+
+pd.DataFrame(
+    csr_matrix((data, (users, items)), shape=(total_users, total_items)).todense(),
+    columns=items_
+)
+
+test = csr_matrix((data, (users, items)), shape=(total_users, total_items)).todense()
+
+cdist(test, test)
+
+
+class ItemVectorizer:
     def __init__(self, delimiter=",", max_items=None):
-        """
-        Params:
-        - delimiter (str, ','): the list separator
-        - max_items (int, None): maximum number of items to vectorize
-        """
         self.delimiter = delimiter
         if max_items:
             self.max_items = max_items
@@ -57,10 +112,6 @@ class ItemVectorizer:
         )
 
     def fit(self, X):
-        """Learn a matrix representation of items
-        Params:
-        - X (list-like object): data to learn from
-        """
         self.items = []
         for row in X:
             for thing in row.split(self.delimiter):
@@ -69,10 +120,6 @@ class ItemVectorizer:
         return self
 
     def transform(self, X):
-        """Convert items into a matrix representation
-        Params:
-        - X (list-like object): data to transform
-        """
         Xt = np.zeros((len(X), len(self.items)), dtype=int)
         for i, row in enumerate(X):
             for thing in row.split(self.delimiter):
@@ -84,10 +131,6 @@ class ItemVectorizer:
         return Xt
 
     def fit_transform(self, X):
-        """See .fit and .transform
-        Params:
-        - X (list-like object): data to fit and transform
-        """
         self.fit(X)
         Xt = self.transform(X)
         return Xt
