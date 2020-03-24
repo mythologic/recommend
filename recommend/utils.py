@@ -1,7 +1,7 @@
 import pkg_resources
 import numpy as np
 from scipy.spatial.distance import cdist
-
+from scipy.sparse import csr_matrix
 
 def load_candy():
     """Load candy.csv as a numpy array.
@@ -22,83 +22,20 @@ def load_candy():
     )
     return candy
 
-
-from sklearn.feature_extraction.text import CountVectorizer
-import pandas as pd
-
-df = pd.DataFrame([
-    ['this is a sentence'],
-    ['this is also a sentence'],
-    ['this is not a sentence']
-], columns=['sentences'])
-
-X = df['sentences'].values
-
-cvec = CountVectorizer(stop_words=None)
-cvec.fit(df['sentences'])
-pd.DataFrame(
-    cvec.transform(df['sentences']).todense(),
-    columns=cvec.get_feature_names()
-)
-dir(cvec)
-
-# 1. split
-# 2. map words to integers
-# >>> Maybe. figure out size of vocab
-# 3. figure out how to fill out zeroes and ones
-
-X = df['sentences'].values
-
-delimiter = ' '
-max_items = 100
-
-# this is the fitting step
-
-items_ = []
-for row in X:
-    for item in row.split(delimiter):
-        if (item not in items_) and (len(items_) < max_items):
-            items_.append(item)
-
-items_
-
-# Xt = np.zeros((len(X), len(items)), dtype=int)
-# for i, row in enumerate(X):
-#     for thing in row.split(delimiter):
-#         try:
-#             idx = items.index(thing)
-#             Xt[i, idx] = 1
-#         except ValueError:
-#             pass
-
-from scipy.sparse import csr_matrix
-
-total_users = len(X)
-total_items = len(items_)
-
-users = []
-items = []
-for user, item_list in enumerate(X):
-    for item in item_list.split(delimiter):
-        try:
-            users.append(user)
-            items.append(items_.index(item))
-        except ValueError:
-            pass
-
-data = [1] * len(users)
-
-pd.DataFrame(
-    csr_matrix((data, (users, items)), shape=(total_users, total_items)).todense(),
-    columns=items_
-)
-
-test = csr_matrix((data, (users, items)), shape=(total_users, total_items)).todense()
-
-cdist(test, test)
-
-
 class ItemVectorizer:
+    """Learn a vectorized representation of(similar to LabelBinarizer/CountVectorizer)
+
+    Params:
+    - delimiter (str, default=','): item separator
+    - max_items (int, default=None): total number of items to vectorize
+
+    ```
+    import pandas as pd
+    raw_candy = load_candy()
+    candy = pd.DataFrame(raw_candy)
+    ```
+    """
+
     def __init__(self, delimiter=",", max_items=None):
         self.delimiter = delimiter
         if max_items:
@@ -112,29 +49,33 @@ class ItemVectorizer:
         )
 
     def fit(self, X):
-        self.items = []
+        self.items_ = []
         for row in X:
-            for thing in row.split(self.delimiter):
-                if (thing not in self.items) and (len(self.items) < self.max_items):
-                    self.items.append(thing)
+            for item in row.split(self.delimiter):
+                item = item.strip()
+                if (item not in self.items_) and (len(self.items_) < self.max_items):
+                    self.items_.append(item)
         return self
 
     def transform(self, X):
-        Xt = np.zeros((len(X), len(self.items)), dtype=int)
-        for i, row in enumerate(X):
-            for thing in row.split(self.delimiter):
+        users = []
+        items = []
+        for user, item_list in enumerate(X):
+            for item in item_list.split(self.delimiter):
+                item = item.strip()
                 try:
-                    idx = self.items.index(thing)
-                    Xt[i, idx] = 1
+                    users.append(user)
+                    items.append(self.items_.index(item))
                 except ValueError:
                     pass
-        return Xt
+        data = [1] * len(users)
+        matrix = csr_matrix((data, (users, items)), shape=(len(X), len(self.items_)))
+        return matrix
 
     def fit_transform(self, X):
         self.fit(X)
         Xt = self.transform(X)
         return Xt
-
 
 class NearestNeighbors:
     def __init__(self, n=5):
