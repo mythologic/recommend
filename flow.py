@@ -14,7 +14,7 @@ df = df[df['user'].isin([
     'doylelaura'
 ])].reset_index(drop=True)
 
-# interaction machine 
+# interaction machine
 
 class Interactions:
     def __init__(self, users, items, ratings=None):
@@ -29,39 +29,37 @@ class Interactions:
         self.matrix = sp.coo_matrix((ratings, (uids, iids)), shape=(nu, ni))
 
 interactions = Interactions(df['user'], df['item'], df['review'])
-interactions = Interactions(df['user'], df['item'])
+# interactions = Interactions(df['user'], df['item'])
 
-# def train_test_split(interactions, test_percentage=0.2, random_state=None):
+# from sklearn.model_selection import train_test_split
+# train_test_split()
 
-random_state = 42
-random_state = np.random.RandomState(random_state)
-
-test_percentage=0.2
-
-matrix = interactions.matrix
-
-idx = np.arange(len(matrix.row))
-random_state.shuffle(idx)
-
-u = matrix.row[idx]
-i = matrix.col[idx]
-ratings = matrix.data[idx]
-cut = int((1.0 - test_percentage) * len(uids))
-
-
-train = sp.coo_matrix(
-    (data[:cut], (uids[:cut], iids[:cut])),
-    shape=shape,
-)
-test = sp.coo_matrix(
-    (data[test_idx], (uids[test_idx], iids[test_idx])),
-    shape=shape,
-    dtype=interactions.dtype,
-)
-
+def train_test_split(interactions, test_size=0.2, random_state=None):
+    # shuffle
+    idx = np.arange(len(matrix.row))
+    np.random.RandomState(random_state).shuffle(idx)
+    uids = interactions.matrix.row[idx]
+    iids = interactions.matrix.col[idx]
+    ratings = interactions.matrix.data[idx]
+    # split
+    cut = int((1.0 - test_size) * len(uids))
+    train = sp.coo_matrix((ratings[:cut], (uids[:cut], iids[:cut])), shape=matrix.shape)
+    test = sp.coo_matrix((ratings[cut:], (uids[cut:], iids[cut:])), shape=matrix.shape)
     return train, test
 
+train, test = train_test_split(interactions)
 
+pd.DataFrame(
+    train.todense(),
+    index=interactions.user_encoder.classes_,
+    columns=interactions.item_encoder.classes_
+)
+
+pd.DataFrame(
+    test.todense(),
+    index=interactions.user_encoder.classes_,
+    columns=interactions.item_encoder.classes_
+)
 
 
 #
