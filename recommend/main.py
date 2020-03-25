@@ -1,13 +1,34 @@
-from .utils import ItemVectorizer, NearestNeighbors
+# from .utils import ItemVectorizer, NearestNeighbors
+from recommend.utils import Interactions, NearestNeighbors
+from recommend.utils import train_test_split
+from recommend.utils import load_candy
 
-# from recommend.utils import ItemVectorizer, NearestNeighbors
+import pandas as pd
 
-from unittest.mock import Mock
+df = pd.read_csv('recommend/data/candy.csv')
 
-self = Mock()
-n = 5
-delimiter = ","
-max_items = None
+df.head(1)
+
+interactions = Interactions()
+interactions.fit(df['item'])
+matrix = interactions.transform(df['user'], df['item'], df['review'])
+
+train, test = train_test_split(matrix)
+
+nn = NearestNeighbors()
+nn.fit(train)
+nn.kneighbors(train)
+
+interactions.user_encoder.inverse_transform([0])
+
+df[df['user'] == 'darlene90']
+
+for u in [0, 1978, 2020, 15, 286]:
+    name = interactions.user_encoder.inverse_transform([u])[0]
+    print(df[df['user'] == name])
+
+
+
 
 
 class Recommend:
