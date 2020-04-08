@@ -1,7 +1,0 @@
-predict returns numpy array
-try to pickle
-AUC and precision@k
-train test split
-doc strings
-github releases
-better examples to include

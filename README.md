@@ -1,5 +1,5 @@
 <h3 align="center">
-  <img src="https://raw.githubusercontent.com/maxhumber/recommend/master/images/recommend-alt.png" height="300px" alt="recommend">
+  <img src="https://raw.githubusercontent.com/maxhumber/recommend/master/images/recommend.png" height="300px" alt="recommend">
 </h3>
 <p align="center">
   <a href="https://travis-ci.org/maxhumber/recommend"><img alt="Travis" src="https://img.shields.io/travis/maxhumber/recommend.svg"></a>
