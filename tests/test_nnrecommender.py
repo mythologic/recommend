@@ -1,8 +1,7 @@
 import pandas as pd
 import pytest
 
-from recommend import Recommend
-
+from recommend import NNRecommender
 
 @pytest.fixture
 def food():
@@ -17,9 +16,8 @@ def food():
     )
     return food
 
-
-def test_nn_recommender(food):
-    r = Recommend(n=2)
+def test_nnrecommender(food):
+    r = NNRecommender(n=2)
     r.fit(food["food"])
     anika = ["ethiopian,italian"]
     results = r.predict(anika)

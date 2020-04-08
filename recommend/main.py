@@ -1,16 +1,6 @@
 from .utils import ItemVectorizer, NearestNeighbors
 
-# from recommend.utils import ItemVectorizer, NearestNeighbors
-
-from unittest.mock import Mock
-
-self = Mock()
-n = 5
-delimiter = ","
-max_items = None
-
-
-class Recommend:
+class NNRecommender:
     def __init__(self, n=5, delimiter=",", max_items=None):
         self.iv = ItemVectorizer(delimiter, max_items)
         self.nn = NearestNeighbors(n)
